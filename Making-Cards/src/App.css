@@ -1,0 +1,126 @@
+* {
+  font-family: sans-serif;
+  box-sizing: border-box;
+}
+
+* button {
+  cursor: pointer;
+}
+
+html,
+body {
+  background: linear-gradient(180deg, #dad996 0%, #88895f 100%);
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+}
+
+.Card {
+  background-color: #fff;
+  width: 300px;
+  border: 1px solid #ccc;
+  padding: 10px 25px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.Card-Container {
+  margin: 20px 0px; 
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+}
+
+.Card-Header {
+  height: 65px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.Card-Header h4 {
+  /* margin: 0; */
+  font-weight: bold;
+}
+
+.Card-Header p {
+  font-size: 32px;
+  margin-top: 18px;
+}
+
+.Card-Center {
+  display: flex;
+  justify-content: space-between;
+  height: 180px;
+}
+
+.Card-Center p {
+  font-size: 28px;
+  width: 80%;
+  line-height: 1.2;
+}
+
+.Card-Center img {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  margin-top: 70px;
+  margin-left: 20px;
+}
+
+.circle {
+  display: flex;
+  gap: 5px;
+  margin-top: 10px;
+  justify-content: center;
+  height: 30px;
+}
+
+.circle div {
+  cursor: pointer;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #d6d6d6;
+}
+
+.Card-Footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+}
+
+.Card-Footer img {
+  width: 55px;
+  height: 55px;
+  object-fit: contain;
+}
+
+.Card-Footer p {
+  font-size: 14px;
+  font-weight: bold;
+  margin-top: 10px;
+  margin-right: 35px;
+  margin-left: 10px;
+}
+
+.Card-Footer button {
+  height: 40px;
+  width: 70px;
+  border: none;
+  background-color: #000;
+  color: white;
+  border-radius: 80px;
+  margin-top: 5px;
+  font-size: 15px;
+}

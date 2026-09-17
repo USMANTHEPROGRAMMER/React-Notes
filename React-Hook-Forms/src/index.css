@@ -1,0 +1,26 @@
+* {
+  font-family: 'Poppins', sans-serif;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
+}
+
+body {
+  height: 200vh;
+  background-color: #f5f5f5;
+}
+
+.App {
+  gap: 20px;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background-color: #ae4545;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+}
