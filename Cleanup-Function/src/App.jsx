@@ -1,9 +1,15 @@
-import React from 'react'
+import React from "react";
+import Child from "./Components/Child.jsx";
 
 const App = () => {
-  return (
-    <div>App</div>
-  )
-}
+  const [show, setShow] = React.useState(false);
 
-export default App
+  return (
+    <div>
+      <button onClick={() => setShow(!show)}>Toggle</button>
+      {show && <Child />}
+    </div>
+  );
+};
+
+export default App;

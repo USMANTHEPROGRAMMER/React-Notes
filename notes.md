@@ -1014,3 +1014,36 @@ useEffect(() => {
 
 ye return wala function humara Cleanup Function hota hai.
 iska Name Clanup kyun?
+Real Life main Socho:
+fan on kia, kaam khatam hua, fan off OR Timer Start kia Component ki Zrort nahi Timer Stop!
+
+Simple and Basic sa Idea:
+Cleanup function basically:
+Jo kaam useEffect ne start kiya tha, jab uski zaroorat khatam ho to usko stop/remove karna.
+📍 Cleanup kahan kaam aata hai?
+
+Jab useEffect koi ongoing/external cheez start kare:
+
+Effect mein kya start kiya?	Cleanup mein kya karoge?
+setInterval()	clearInterval()
+setTimeout()	clearTimeout()
+addEventListener()	removeEventListener()
+Subscription	unsubscribe()
+WebSocket	close()
+API request	abort() where appropriate
+
+Cleanup Funtion humara Component unmount hone ke ilawa Agar dependency change hone ki wajah se effect dobara run hona hai:
+
+OLD EFFECT
+    ↓
+CLEANUP
+    ↓
+NEW EFFECT
+
+Aur jab component completely remove hota hai:
+
+COMPONENT UNMOUNT
+       ↓
+    CLEANUP
+
+This is Very Useful Things BTW.
