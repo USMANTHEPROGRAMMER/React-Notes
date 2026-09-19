@@ -10,7 +10,7 @@ const ZodRHF = () => {
       name: z.string().min(3, "Name must be at least 3 characters"),
       password: z.string().min(8, "Password must be at least 8 characters"),
       confirmPass: z.string(),
-      email: z.string().email(),
+      email: z.email("Email is Required"),
     })
     .refine((data) => data.password === data.confirmPass, {
       message: "Passwords do not match!",
@@ -22,17 +22,19 @@ const ZodRHF = () => {
     handleSubmit,
     getValues,
     formState: { errors },
-  } = useForm({ resolver: zodResolver(userSchema) });
+  } = useForm({resolver: zodResolver(userSchema)});
+
+  // { resolver: zodResolver(userSchema) }
 
   function onSubmit(data) {
     console.log(data);
   }
 
-  const values = getValues();
-  console.log(values);
+  // const values = getValues();
+  // console.log(values);
 
-    const result = userSchema.safeParse(values);
-    console.log(result);
+    // const result = userSchema.safeParse(values);
+    // console.log(result);
 
   return (
     <div className="ZodRHF">
@@ -58,9 +60,12 @@ const ZodRHF = () => {
           placeholder="Confirm Password!!"
           {...register("confirmPass")}
         />
-        {errors.password && (
-          <p style={{ color: "red" }}>{errors.password.message}</p>
-        )}
+        <div className="Err-div">
+          {errors.name && <p>Name is required</p>}
+          {errors.email && <p>Email is Required</p>}
+          {errors.password && <p>Password is required</p>}
+          {errors.confirmPass && <p>Passwords do not match</p>}
+        </div>
         <button type="submit">Submit the Form!</button>
       </form>
     </div>

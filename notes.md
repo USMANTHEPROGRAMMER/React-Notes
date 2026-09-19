@@ -991,6 +991,26 @@ schema.refine(...)
 ab hum smjhenge .transform() means ke Zod sirf Validation nahi krskta balke Data Transform bhi krskta hai.
 z.string().transform((value) => value.trim())
 
-kal main kronga how to combine RHF with Zod 
-and zod ko or ache se smjhaonga 
-and ultimate chart Create krwaonga of Zod using GPT.
+ab hum Zod and RHF ko Integrate krena seekhenge or yeh chez possible ho paati hai using zodResolver():
+zodResolver() ek tareeke se Bridge ka kaam krta hai Between RHF and Zod. Zod resolver ko humen Install krna parta hai using "npm install @hookform/resolvers". then import krne ke liye humen yeh line run krni paregi:
+import { zodResolver } from "@hookform/resolvers/zod";
+
+ab hum smjhenge humare ek Topic rehgya tha Previously of useEffect which is Called Cleanup Function 
+useEffect main hum na ek Function dete hain this is how it looks:
+useEffect(() => {
+  // effect ka kaam
+}, []);
+Lekin ye effect kuch aisa kaam bhi start kar sakta hai jisko baad mein band / clean karna zaroori ho.
+uske liye hum return krte hain.
+useEffect(() => {
+
+  // START / setup
+
+  return () => {
+    // CLEANUP
+  };
+
+}, []);
+
+ye return wala function humara Cleanup Function hota hai.
+iska Name Clanup kyun?

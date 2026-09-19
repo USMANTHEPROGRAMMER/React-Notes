@@ -1,6 +1,7 @@
 import React from "react";
 import { useForm } from "react-hook-form";
 import ZodRHF from "./Components/ZodRHF";
+import Registrationform from "./Components/Registrationform";
 
 const App = () => {
   React.useEffect(() => {
@@ -75,6 +76,7 @@ const App = () => {
         </form>
       </div>
       <ZodRHF />
+      <Registrationform />
     </>
   );
 };
