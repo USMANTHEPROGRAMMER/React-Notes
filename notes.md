@@ -1047,3 +1047,9 @@ COMPONENT UNMOUNT
     CLEANUP
 
 This is Very Useful Things BTW.
+
+aaj se hum Start krne wale hain apni REDUX TOOL KIT (RTK):
+sabse pehle hum smjhenge ke Redux tool Kit ki zrort kyun pari hai?
+Redux ko agar Simple Words main smjhen to:
+"Redux ka main purpose hai application ke shared/global state ko predictable aur organized tareeqe se manage karna."
+sabse pehle to hum yeh smjhlete hain ke RTK React ka part nahi hai, Dekho humen na State Manage krne main Problem aati thi in React

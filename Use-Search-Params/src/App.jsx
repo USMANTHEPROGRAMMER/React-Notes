@@ -359,7 +359,7 @@ function App() {
         </p>
 
         <code>
-          ?search=iphone&category=electronics&sort=low
+          {`?search=${search}&category=${category}&sort=${sort}`}
         </code>
 
       </div>
