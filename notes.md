@@ -1053,3 +1053,28 @@ sabse pehle hum smjhenge ke Redux tool Kit ki zrort kyun pari hai?
 Redux ko agar Simple Words main smjhen to:
 "Redux ka main purpose hai application ke shared/global state ko predictable aur organized tareeqe se manage karna."
 sabse pehle to hum yeh smjhlete hain ke RTK React ka part nahi hai, Dekho humen na State Manage krne main Problem aati thi in React
+
+humne useState() prha agar Data sirf ek Component ko chahye to useState Enough hai.
+
+Problem Kab Start hoti hai:
+ab imagine kro ke humare paas ek Ecommerse App hai or usmen humare paas ek Cart hai or wo Cart ab sab Components ko chahye like Navbar, Cart, Products, Cart Total, Checkout, etc.
+yahan Problem Start hoti hai:
+Props Driling ki ke agar beech main kisi Component ko Data nahi bhi chahye to bhi use Zabardasti Data Share krna par jata hai yehi Problem hai Props Drilling ki.
+ab isi cheez ko Tackle krne ke liye humne Context API prha tha ismen Components Directly Context se Shared Data le skte hain.
+lekin Large Application main State Management sirf, Data Sabko Accessible krado itna Enough nahi hota hai.
+humein ye bhi Manage krna hota hai:
+State
+ ↓
+State ka structure
+ ↓
+State kaise change hogi?
+ ↓
+Kis action se change hui?
+ ↓
+Different components kaise update honge?
+ ↓
+Complex state logic
+
+yahan Redux useful hoti hai.
+
+Redux ka Mainly Purpose hota hai ke wo Data ko Centralized krdeta hai to jis kisi ko Component ko Data chahye wo leskta hai. This is the Basic Concept of RTK.
