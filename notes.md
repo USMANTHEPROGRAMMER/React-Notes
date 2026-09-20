@@ -1078,3 +1078,22 @@ Complex state logic
 yahan Redux useful hoti hai.
 
 Redux ka Mainly Purpose hota hai ke wo Data ko Centralized krdeta hai to jis kisi ko Component ko Data chahye wo leskta hai. This is the Basic Concept of RTK.
+
+ab hum ek Dafa Redux ka Architecture smjh lete hain:
+like ab mere paas ek BTN hai Theme Name ka ab user ne us pe Click kia to Event Dispatch hoa then Action hua then Reducer chla and then jahan hum logon ne Data rkha hua tha wahan ka State Change and UI Update
+
+ab Architecture ke 4 Main Parts:
+Store ==> Central Place jahan Redux ka State rkha jata hai.
+Action ==> karna kya hai? Action Khud State ko Directly Change nahi krta ha.
+Reducer ==> Action aya hai ab State main change kaise hoga, Reducer Basically State Update ki Logic rkhta hai.
+Dispatch ==> Action ko Redux tak bhejta hai.
+One-line mental model:
+
+Component action dispatch karta hai → reducer state update karta hai → store updated state rakhta hai → component updated state read karke UI update karta hai.
+
+ab hum Actual Code likhenge:
+Before Writing any Code, Firstly We have to Install Redux Toolkit:
+using this Command ==> npm install @reduxjs/toolkit react-redux
+
+then humare liye behtar yeh rahega ke ek New Folder bnalen in Src Folder names as Redux
+aur ismen humen for Sure Store bnana parega using Store.js
