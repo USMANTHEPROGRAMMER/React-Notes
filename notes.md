@@ -1096,4 +1096,167 @@ Before Writing any Code, Firstly We have to Install Redux Toolkit:
 using this Command ==> npm install @reduxjs/toolkit react-redux
 
 then humare liye behtar yeh rahega ke ek New Folder bnalen in Src Folder names as Redux
-aur ismen humen for Sure Store bnana parega using Store.js
+aur ismen humen for Sure Store bnana parega by making file named Store.js
+then hum is File ke andar configureStore ko import krenge and then ek Store bnayengy using configureStore like this:
+import { configureStore } from "@reduxjs/toolkit";
+
+export const store = configureStore({
+  reducer: {
+    
+  }
+});
+
+ab humne yeh Store to bnaliya lekin ab hum chhate hain na ke hum yeh poori Application main kahin bhi Use krsken to uske liye hum ise Import krayenge in main.jsx File.
+and Provider ko bhi Import krenge from react-redux then App ko Provider main Wrap krenge and store main hum jis name se variable ka name likha tha wo likh denge so far.
+
+hum log Reducer main apne Slices Baad main Connect krenge.
+Slices mainly hum Features ko kehte hain.
+
+yeh saari cheezen hum log baad main krenge pehle hum log ek dafa again and Crystal Clear Way main Redux Architecture smjh lete hain:
+1. ab jaise maan lo humari screen par hai ke ek Btn hai "Add to Cart".
+2. user ne Add to Cart Button par Click kia means User ne Action kia hai Just.
+3. React main Button ka Click ek Event hai user ne Btn par Click kia yahan onClick humara EventHandler hai.
+3. ab onClick ke andar hum logon ne ek Function Pass kia hoa tha handleAddtoCart() krke ye jo handleAddToCart() hai ye ek Function hai jo Decide krega ke user ne Add to Cart Click kia hai ab Redux ko Inform krna hai.
+4. ab Event Handler ke Andar hum logon ne Redux ko Action bheja. yahan pe humara Kaam ata hai dispatch() ka, dispatch ka kaam hai Action ko Redux System tak bhejna. "Dispatch = "Redux, ye instruction tumhare paas aa rahi hai"
+5. ab aate hain Action pe, Action Basically ek Message/Instruction hai. Action ke Generally 2 Imp Parts ko smjhna hai: type: Type Batata hai ke kia hua OR kia krna hai, payload: Payload Batata hai ke kis Data ke Saath hua.
+6. ab jo Action hai Reducer tak jaata hai. Reducer ka Kaam hai: Theek Action Aagya hai ab State ko Update kaise krna hai. Reducer decision/logic rakhta hai ke state kaise change hogi.
+7. Sate Basically humara Curent Data hai. State humari Application ka Current Data
+8. ab ye Updated State Redux Store main hoti hai. Store ko Simple Language main Redux ki Central State Container smjho. Reducer state ko update karta hai aur Store updated state ko hold karta hai.
+9. ab Maanlo Navbar main yeh dikhana hai Cart (1) yahan useSelector kaam aayega. useSelector ka Kaam hota hai Store se Required State Read krna.
+10. then UI Update.
+
+ab har Function ka One Line Meaning:
+| Term              | Kaam                                     |
+| ----------------- | ---------------------------------------- |
+| **User**          | UI ke saath interact karta hai           |
+| **Event**         | User ka action, e.g. click               |
+| **Event Handler** | Event ko handle karne wala function      |
+| **Dispatch**      | Action ko Redux tak bhejta hai           |
+| **Action**        | Batata hai kya hua / kya karna hai       |
+| **Payload**       | Action ke saath actual data              |
+| **Reducer**       | Decide karta hai state kaise update hogi |
+| **State**         | Application ka current data              |
+| **Store**         | Redux state ko centrally hold karta hai  |
+| **Selector**      | Store se required state read karta hai   |
+| **Component**     | State ke according UI render karta hai   |
+
+ab Full Architecture Diagram:
+                         USER
+                           │
+                           │ clicks
+                           ▼
+                    ┌──────────────┐
+                    │    EVENT     │
+                    │    onClick   │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │    EVENT     │
+                    │   HANDLER    │
+                    └──────┬───────┘
+                           │
+                           │ dispatch()
+                           ▼
+                    ┌──────────────┐
+                    │    ACTION    │
+                    │              │
+                    │ type         │
+                    │ payload      │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │   REDUCER    │
+                    │              │
+                    │ state update │
+                    │    logic     │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │    STORE     │
+                    │              │
+                    │    STATE     │
+                    └──────┬───────┘
+                           │
+                           │ useSelector()
+                           ▼
+                    ┌──────────────┐
+                    │  COMPONENT   │
+                    └──────┬───────┘
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │      UI      │
+                    └──────────────┘
+
+ab hum log Firse New Starting krte hain or phir se saari cheezen smjhte hain:
+sabse pehle to humne Install krna seekhlia hai ke Actual Install kaise krte hain.
+then Folder Structure krenge:
+
+
+
+
+then Redux Store Create krenge: (store.js) main
+import { configureStore } from "@reduxjs/toolkit";
+
+export const store = configureStore({
+  reducer: {
+    
+  }
+});
+using configureStore, ab configureStore() kya karrha hai ke yeh humara Store Create krrha hota hai.
+Store ka Purpose: Redux ki State Hold krna 
+abhi Store Empty hai:
+kyun ke humne koi bhi Slices Create nahi kre.
+
+ab baat krte hain hum log Provider ki:
+import React from "react";
+import ReactDOM from "react-dom/client";
+
+import App from "./App";
+
+import { Provider } from "react-redux";
+import { store } from "./app/store";
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <Provider store={store}>
+    <App />
+  </Provider>
+);
+
+Provider kyun? kyun ke yeh React Components ko Redux Store tak Access deta hai.
+Golden Line:
+Provider = React app ko Redux Store available karwana.
+
+ab hum baat krenge Slice ki ab Actual Logic Start:
+sabse pehle hum log Initial State Create krte hain:
+meaning State ki Starting Condition using Object.
+const initialState = {
+  items: [],
+  totalItems: 0
+};
+
+ab hum log Slice Create krenge: using createSlice() 
+Slice Basically Cart ki Redux Related cheezen ek jagah Organize krta hai.
+cartSlice
+│
+├── name
+├── initialState
+├── reducers
+└── actions
+
+name ==> Yeh Slice ka Name hai.
+reducers ==> reducers: {
+  addToCart: (state, action) => {
+    
+  }
+}
+State ko Change kaise krna hai.
+state ==> Current Cart State
+action ==> Redux ko bheja gya Message/Instruction hai.
+payload ==> Action ke saath bheja gya Actual Data.
+
+
+step 6 se start krenge and folder structure bhi complete krna hai.
