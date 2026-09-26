@@ -1087,6 +1087,7 @@ Store ==> Central Place jahan Redux ka State rkha jata hai.
 Action ==> karna kya hai? Action Khud State ko Directly Change nahi krta ha.
 Reducer ==> Action aya hai ab State main change kaise hoga, Reducer Basically State Update ki Logic rkhta hai.
 Dispatch ==> Action ko Redux tak bhejta hai.
+Slice ==> kisi particular feature ki Redux state aur uski update logic ka organized section.
 One-line mental model:
 
 Component action dispatch karta hai → reducer state update karta hai → store updated state rakhta hai → component updated state read karke UI update karta hai.
@@ -1192,12 +1193,26 @@ ab Full Architecture Diagram:
                     └──────────────┘
 
 ab hum log Firse New Starting krte hain or phir se saari cheezen smjhte hain:
+Part 1:
 sabse pehle to humne Install krna seekhlia hai ke Actual Install kaise krte hain.
-then Folder Structure krenge:
+Part 2:
+then Folder Structure ye use krenge:
+src/
+│
+├── app/
+│   └── store.js
+│
+├── features/
+│   └── counter/
+│       └── counterSlice.js
+│
+├── App.jsx
+└── main.jsx
+ab ek ek Folder ka Purpose smjhte hain hum;
+app/ ==> ke andar Application Level Redux Setup rakhenge.
+features/ ==> ke andar Individual Features likhenge.
 
-
-
-
+Part 3:
 then Redux Store Create krenge: (store.js) main
 import { configureStore } from "@reduxjs/toolkit";
 
@@ -1210,7 +1225,9 @@ using configureStore, ab configureStore() kya karrha hai ke yeh humara Store Cre
 Store ka Purpose: Redux ki State Hold krna 
 abhi Store Empty hai:
 kyun ke humne koi bhi Slices Create nahi kre.
+Reducer Store ke andar kyun ? ==> Store ko batana hai ke state ko manage kaun karega.
 
+Part 5:
 ab baat krte hain hum log Provider ki:
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -1230,33 +1247,171 @@ Provider kyun? kyun ke yeh React Components ko Redux Store tak Access deta hai.
 Golden Line:
 Provider = React app ko Redux Store available karwana.
 
-ab hum baat krenge Slice ki ab Actual Logic Start:
+Part 6:
+ab actual Counter State bnate hain. using counterSlice.js
+Slice = kisi particular feature ki Redux state aur uski update logic ka organized section.
+
+Part 7:
 sabse pehle hum log Initial State Create krte hain:
 meaning State ki Starting Condition using Object.
 const initialState = {
-  items: [],
-  totalItems: 0
+  value: 0
 };
+yeh bht simple hai hum just keh rhe hain ke Count ki Starting Value 0 hai. Application Start Count Value 0.
+initial State kyun Redux ko Starting State pata hona chahye.
 
+Part 8:
 ab hum log Slice Create krenge: using createSlice() 
 Slice Basically Cart ki Redux Related cheezen ek jagah Organize krta hai.
-cartSlice
+counterSlice
 │
 ├── name
 ├── initialState
 ├── reducers
-└── actions
 
+iske andar 3 major things hoti hain:
+
+Part 9:
 name ==> Yeh Slice ka Name hai.
+
+Part 10:
 reducers ==> reducers: {
-  addToCart: (state, action) => {
+  counter: (state) => {
     
   }
 }
-State ko Change kaise krna hai.
 state ==> Current Cart State
-action ==> Redux ko bheja gya Message/Instruction hai.
-payload ==> Action ke saath bheja gya Actual Data.
+ismen bht simple sa matlab hai reducers ka ke State ko Update krne ki Logic Define krna.
+Reducer ko Rul Book smjho is ke andar hum log Rules Define krte hain.
+
+Part 11:
+Action kia hai?
+humne likha Reducer main:
+increment: (state) => {
+   state.value += 1;
+}
+increment humara abhi Action nahi hai.
+ye Reducer Case ka Name hai sirf.
+Redux Tool Kit isi Name se Automatically Action Creator Generate krta hai.
+Action ke andar humari Type hoti hai, type batata hai ke konsa Action hua.
+
+Part 12:
+Action Creator
+export const { increment, decrement } =
+  counterSlice.actions;
+yahan counterSlice.actions ke andar RTK ne Automtatically functions bnadiye 
+ab Component main hum increment() use krskte hain
+Important:
+increment
+aur
+increment()
+same cheez nahi samjho.
+increment → function/action creator ka reference.
+increment() → action object create karta hai.
+Conceptually:
+increment()
+     ↓
+{
+  type: "counter/increment"
+}
+
+ye wali line agar hum log smjhen to humen har cheez amjh ajayegi:
+Ek line mein:
+
+Action Creator (increment) ek function hai; usko call karne (increment()) par Action Object banta hai; dispatch() us Action Object ko Redux ko bhejta hai.
+
+Part 13:
+export default counterSlice.reducer;
+ye Actual Reducer ko export krta hai
+kyun ke Store ko yeh Reducer chahye rehta hai.
+Flow:
+counterSlice
+      ↓
+counterSlice.reducer
+      ↓
+store.js
+Reducer ko export isliye kar rahe hain kyunki Store ko reducer ki zaroorat hai.
+counterSlice.reducer
+Store ko chahiye:
+"Action aane ke baad state ko kaise handle karna hai?"
+Isliye reducer export.
+Reducer ka kaam yeh hai ke:
+Action aane ke baad State ko kaise update karna hai, ye decide karna.
+To Store ko reducer kyun dete hain?
+Store ke paas State hoti hai, lekin Store khud nahi jaanta:
+"increment action aaye to kya karun?"
+Reducer Store ko rules/logic deta hai.
+Store
+  │
+  ├── State rakhta hai
+  │
+  └── Reducer se poochta hai:
+       "Action aaya, ab State kya honi chahiye?"
+Isliye reducer ko export karke Store mein dete hain.
+Reducer = State update karne ka logic/rule.
+
+Part 14:
+ab hum Store main Counter Connect krenge.
+import { configureStore } from "@reduxjs/toolkit";
+
+import counterReducer
+  from "../features/counter/counterSlice";
+
+export const store = configureStore({
+
+  reducer: {
+    counter: counterReducer
+  }
+
+});
+
+Part 15:
+ab Component ki baari hai:
+pehle Redux se State Read krenge using:
+import { useSelector } from "react-redux";
+useselector() ==> Store se State Read krne ke liye.
+
+Part 16:
+useSelector() 
+const count = useSelector(
+  (state) => state.counter.value
+);
+Is line ko slowly samjho.
+Redux Store:
+state
+│
+└── counter
+      │
+      └── value: 
+Selector:
+(state) => state.counter.value
+Meaning:
+"Mujhe Redux Store ki counter state ke andar se value chahiye."
+Result:
+count = 0
+
+Part 17:
+UI main Show krenge.
+
+Part 18:
+ab + Click pe State Change krni hai:
+iske liye use Dispatch() ka use krenge.
+
+Part 19:
+const dispatch = useDispatch();
+useDispatch() humen Redux ka dispatch function deta hai.
+Simple:
+Dispatch = Redux ko action bhejne ka mechanism.
+
+PART 20
+Event Handler
+Button:
+<button onClick={handleIncrement}>
+  +
+</button>
+Function:
+const handleIncrement = () => {
+  dispatch(increment());
+};
 
 
-step 6 se start krenge and folder structure bhi complete krna hai.

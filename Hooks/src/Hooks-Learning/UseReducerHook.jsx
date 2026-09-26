@@ -92,9 +92,9 @@
 
 // export default App;
 
-import React from "react";
+import { useReducer} from "react";
 
-const useReducerHook = () => {
+const useReducerHook = () => { // Main Function 
 
   
   function countFun(count, action) {
@@ -109,7 +109,7 @@ const useReducerHook = () => {
     }
   }
 
-  const [count, countDispatch] = React.useReducer(countFun, 0);
+  const [count, countDispatch] = useReducer(countFun, 0);
 
   return (
     <>
@@ -118,7 +118,7 @@ const useReducerHook = () => {
         countDispatch({type: "Increment"})
       }}>Increment</button>
       <button onClick={() => {
-        countDispatch({type:"Decrement"})
+        countDispatch({type: "Decrement"})
       }}>Decrement</button>
     </>
   );
