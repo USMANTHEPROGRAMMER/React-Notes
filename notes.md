@@ -1414,4 +1414,275 @@ const handleIncrement = () => {
   dispatch(increment());
 };
 
+Kab NEW Slice banana hai?
+Khud se yeh question pooch:
+"Kya yeh ek separate feature hai jiska apna state aur state-changing logic hai?"
+
+NOW WE ARE LEARNING ABOUT TANSTACKQUERY FROM TODAY:
+sabse pehle ek Fundamental Confusion Clear krlete hain:
+Redux Toolkit                 TanStack Query
+─────────────────             ─────────────────
+Client State                  Server State
+
+cart                          API data
+theme                         users
+sidebar                       products
+UI preferences                posts
+local app state               backend data
+
+ab hum smjhlete hain ke Server State kia hota hai:
+Jo data backend/server se aata hai:
+React App
+   ↓
+   API Request
+   ↓
+Backend / Database
+   ↓
+   Response
+   ↓
+React App
+
+Tan Stack Query kia hota hai:
+TanStack Query React applications mein server/API data ko fetch, cache, synchronize aur update karne ko easy banata hai.
+
+Normally hum:
+useEffect
+   ↓
+fetch()
+   ↓
+useState(data)
+   ↓
+useState(loading)
+   ↓
+useState(error)
+manage karte hain.
+TanStack Query mein bohat saari yeh responsibility Query manage karti hai.
+
+Golden Rule:
+
+Redux = App ki state
+TanStack Query = Server/API ki state
+
+Step 0:
+
+usko Install krne ke liye hum yeh Use krte hain:
+npm install @tanstack/react-query
+
+Phir main.jsx mein:
+
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+const queryClient = new QueryClient();
+
+ReactDOM.createRoot(document.getElementById("root")).render(
+  <QueryClientProvider client={queryClient}>
+    <App />
+  </QueryClientProvider>
+);
+Ye kyun kiya?
+QueryClient
+     ↓
+TanStack Query ka manager
+     ↓
+queries + cache + server-state management
+Aur:
+QueryClientProvider
+        ↓
+React components ko QueryClient available karwata hai
+bas Setup Complete.
+
+1. (useQuery):
+Ab Asli TanStack Query.
+Suppose humne Products API se laane hain.
+
+Normally:
+useEffect()
+   ↓
+fetch()
+   ↓
+setProducts()
+
+TanStack Query mein:
+useQuery()
+   ↓
+API se data
+   ↓
+data 
+
+Basic Structure:
+const { data, isPending, isError, error } = useQuery({
+  queryKey: ["products"],
+  queryFn: fetchProducts
+});
+yahan 2 Cheezen sabse Important hain:
+queryKey
+queryFn
+
+queryFn:
+queryFn ye batata hai ke Data Lana kaisa hai?
+Example:
+const fetchProducts = async () => {
+  const response = await fetch("/api/products");
+  return response.json();
+};
+
+data => API ka Result => const { data } = useQuery(...)
+loading => const { data, isPending } = useQuery(...)
+Error => const { isError, error } = useQuery(...)
+
+So useQuery ka basic job:
+Server se data READ/FETCH karna + uski state manage karna.
+
+2. (queryKeys):
+ab maanlo humare paas:
+Products
+Users
+Posts
+TanStack Query ko kaise pata chlega ke konsa Data konsa hai
+Query Key ka simple meaning:
+"Is query ka unique identity/name kya hai?"
+
+Dynamic query Keys:
+Suppose:
+/products/10
+Aur:
+/products/20
+To:
+["product", 10]
+aur:
+["product", 20]
+different queries hain.
+
+["product", 10]
+        ≠
+["product", 20]
+Why?
+Because product 10 aur product 20 ka data different hai.
+
+3. Caching
+ye TanStack Query ka bht Important Feature hai:
+suppose hum /products first Time Open krta hoon:
+Component
+   ↓
+useQuery
+   ↓
+API Request
+   ↓
+Products
+   ↓
+Cache 💾
+Tan Stack Query Data ko Cache krleti hai.
+ab agar main same /products
+dubara use krta hoon 
+to TanStack Query Cache main Already Data Known hoga to wo Agai se Re-Fetch nahi krega.
+Simple definition:
+Caching = fetched server data ko temporarily store karke rakhna.
+
+4. Refetching
+Refetching = API se data ko again fetch karna.
+
+code main kaise use krna hai wo dekht lete hain;
+useQuery humen refetch function deta hai:
+const { data, refetch } = useQuery({
+  queryKey: ["products"],
+  queryFn: fetchProducts,
+});
+
+<button onClick={refetch}>
+  Refresh
+</button>
+
+Button Click:
+Click Refresh
+     ↓
+refetch()
+     ↓
+API request again
+     ↓
+New data
+     ↓
+Cache update
+     ↓
+UI update
+
+React Query khud bhi Refetch krskta hai.
+For Example:
+User page se bahar gaya
+       ↓
+Dusri tab/window par gaya
+       ↓
+Wapas app par aaya
+       ↓
+React Query → refetch
+
+Simple Definition:
+Refetching = Existing query ka data API se dobara fetch karna, taake latest data mil sake.
+
+5. Stale Data 
+Suppose API se Data aya Products, TanStack Query ke Perspective se Fresh hota hai lekin kuch Time ke baad Fresh ==> Stale Data.
+
+Stale ka Matlab hai:
+Stale ≠ deleted
+Stale ≠ useless
+Stale ka simple meaning:
+"Ye data ab fresh/recent nahi maana ja raha; zarurat par ise refetch kiya ja sakta hai."
+
+Stale Time hum khud decide krskte hain ke kitne Time tak Data Fresh mana jayega.
+Like Data agar 5 Mins tak Fresh mana jaaye to uske liye hum aise Code Implement krenge:
+useQuery({
+  queryKey: ["products"],
+  queryFn: fetchProducts,
+  staleTime: 300000, 
+});
+yahan pe hum log Stale Time Define krrhe hain
+
+6. useMutation
+ab tak hum Data Read krrhe the lekin agar Data Change krna ho to hum useMutation use krenge.
+useQuery
+→ Server se data READ
+
+useMutation
+→ Server par data CHANGE
+useMutation ka just Idea kaafi hai For Now jab hum Proper Database Learn krenge to isko in Detal and in Depth smjhenge.
+
+7. Query Invalidation
+Query Invalidation = React Query, ye cached data ab purana ho sakta hai — isko dobara check karna.
+Example:
+Products cache mein:
+10 products
+     ↓
+User adds a new product
+     ↓
+Server:
+11 products
+     ↓
+Cache ab purana hai ❌
+     ↓
+Query Invalidation
+     ↓
+React Query refetch karega
+     ↓
+Latest 11 products ✅
+Ye kyun chahiye?
+
+Suppose tumhare paas:
+
+useQuery → Products
+
+Aur user:
+
+useMutation → Add Product
+
+Product successfully add ho gaya server par, lekin tumhari Products query ke cache mein abhi old data ho sakta hai.
+
+To hum kehte hain:
+
+"Products query ko invalidate karo"
+
+React Query samajhta hai:
+
+"Okay, ye query fresh nahi hai. Mujhe isko dobara fetch karna chahiye."
+
+One-line definition:
+Query Invalidation = kisi cached query ko stale mark karna taake React Query uska fresh data dobara fetch kar sake.
 
