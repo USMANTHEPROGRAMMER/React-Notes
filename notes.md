@@ -1686,3 +1686,844 @@ React Query samajhta hai:
 One-line definition:
 Query Invalidation = kisi cached query ko stale mark karna taake React Query uska fresh data dobara fetch kar sake.
 
+8. Pagination:
+Agar Server pe 1000 Products hain, to ek saath 1000 Producte Load krne ke bajaaye:
+Page 1 → Products 1–10
+Page 2 → Products 11–20
+Page 3 → Products 21–30
+...
+Yani large data ko small pages mein divide karna = Pagination.
+React Query mein flow:
+User → Page 2 click
+          ↓
+     page = 2
+          ↓
+     useQuery
+          ↓
+   API se page 2
+          ↓
+   Products 11–20
+
+Usually query key mein page number hota hai:
+
+["products", 1]  → Page 1
+["products", 2]  → Page 2
+["products", 3]  → Page 3
+
+Iska fayda ye hai ke React Query har page ko separate query/cache entry ki tarah identify kar sakta hai.
+
+9. Infinite Queries:
+Pagination main:
+Page 1
+Page 2
+Page 3
+User Manually Page Change krta hai.
+
+Inifnite Scrolling main;
+Products
+Products
+Products
+↓
+Scroll
+↓
+More Products
+↓
+Scroll
+↓
+More Products
+
+is cheez ke liye hum useInfiniteQuery use krenge:
+useQuery
+   ↓
+Normal query
+   ↓
+Ek page/data set
+
+useInfiniteQuery
+   ↓
+Multiple pages
+   ↓
+Load more / infinite scroll
+
+Tan Stack Query main iske liye:
+useInfiniteQuery()
+
+iska Basic Flow;
+First request
+     ↓
+Page 1
+     ↓
+User clicks "Load More"
+     ↓
+Page 2
+     ↓
+User clicks again
+     ↓
+Page 3
+     ↓
+...
+
+10. Optimistic Updates.
+yeh sabse Advance and Important Topic hai in Tan Stack Query:
+sabse pehle hum smjhlete hain ke Optimistic Update hota kia hai?
+Noramlly:
+User clicks ❤️
+      ↓
+API request
+      ↓
+Server response
+      ↓
+UI update ❤️
+
+Optimistic Update main:
+User clicks ❤️
+      ↓
+UI IMMEDIATELY update ❤️
+      ↓
+API request
+      ↓
+Success ✅ → keep it
+Error ❌ → rollback
+
+Yani hum server ke response ka wait nahi karte, pehle UI ko update kar dete hain because we're optimistic ke request successful hogi. 😄
+Real example
+Suppose:
+Likes: 10
+User ❤️ click karta hai.
+Normal:
+10
+ ↓
+API
+ ↓
+11
+
+Optimistic:
+10
+ ↓
+Immediately 11 ❤️
+ ↓
+API request
+ ↓
+Success → 11 ✅
+
+Agar API fail:
+10
+ ↓
+11 ❤️  ← temporary
+ ↓
+API failed ❌
+ ↓
+10  ← rollback
+
+TanStack Query mein flow:
+Usually useMutation ke saath:
+useMutation
+    ↓
+onMutate
+    ↓
+UI/cache ko immediately update
+    ↓
+API request
+    ↓
+Success?
+   ↙   ↘
+ YES    NO
+ ↓       ↓
+Keep   Rollback
+iska abhi sirf Concept Smjhna Kafi hai lekin jab hum Actual Database and useMutate wager Learn krenge to isko or Detail and Double Down krke smjhenge So Far.
+
+ab hum "React Performance" ka Chapter Start krenge:
+isko seekhne ke pehle hum kuch Concepts seekh lete hain:
+1. Re-Rendering:
+Re-Rendering ka Matlab hai ke Component ka Function dubara Run hona
+jaise humare paas ek Count ka Fn hai jismen State hai jaise hi User ne + Button pe Click kia to State Change hogyi or Component Re-Renderi hogya.
+Important:
+Re-render ≠ poora browser/page reload
+Yeh bohot important hai.
+
+2. Reconcillation:
+ab React ke paas new JSX agya hai.
+React poochta hai ke:
+Previous UI or New UI main kia Difference hai.
+Previous:
+<h1>Hello</h1>
+<button>0</button>
+
+New:
+<h1>Hello</h1>
+<button>1</button>
+React dekhenga ke <h1> same hai lekin <button> Change hogya to Browser main sirf Required Changes Apply krega.
+is Process ko Broadly Reconcillation kehte hain.
+
+Simple Definition:
+Re-render = component dobara calculate hona
+Reconciliation = React new result ko previous result se compare karke required UI changes decide karta hai
+
+3. Keys
+humne map function main keys dekhi hongi:
+products.map(product => (
+  <div key={product.id}>
+    {product.title}
+  </div>
+))
+key dene ka Purpose sirf Warning hatana nahi hota hai balke
+React ko hel milti hai Identify krne main:
+Ye item kaun sa hai?
+Ye naya hai?
+Ye remove hua?
+Ye move hua?
+Ye same item hai?
+
+keys ki wjh se React Understand krta hai:
+A → same
+B → removed
+C → same
+D → new
+
+Golden Rule:
+List mein stable unique key use karo.
+Usually ==> key={item.id} (Best Approach)
+
+4. State Placement:
+ye Perfomace ka bht Important Concept hai:
+Suppose:
+App
+ ├── Navbar
+ ├── Search
+ ├── ProductList
+ └── Footer
+agar searchTextState sirf Search Component ko chahye to State ko Unnecessarily App main rkhna zrori nahi 
+Bad Approach:
+App
+ └── searchText state
+       ↓
+   whole App can re-render
+
+Better:
+
+App
+ ├── Navbar
+ ├── Search
+ │    └── searchText state
+ ├── ProductList
+ └── Footer
+
+Rule:
+State ko jitna Possible hoske utna Neeche rkho - Jahan Actually Required ho!
+isko State Placement kehte hain.
+
+ab Actual Optimization Start!
+1. React.memo
+Suppose:
+Parent
+ ├── Child A
+ └── Child B
+Parent Re-Render hua 
+ormally React Child A aur Child B ko bhi render process mein la sakta hai.
+Agar Child A ka output same hi rehna hai, hum React ko keh sakte hain:
+"Agar props same hain toh is component ko unnecessary render mat karna."
+That's:
+React.memo
+Concept:
+Parent re-render
+       ↓
+Child
+       ↓
+Props same?
+   ↙       ↘
+ YES       NO
+ ↓          ↓
+skip       render
+
+But ⚠️,
+React.memo har component pe lagana good practice nahi.
+Because memoization bhi cost rakhti hai.
+Isliye:
+Pehle unnecessary render identify karo, phir optimize karo.
+Example:
+const UserCard = React.memo(function UserCard({ name }) {
+  return <h2>{name}</h2>;
+});
+React.memo = Parent re-render hone par agar child ke props same hain, to child ka unnecessary re-render skip karne ki optimization.
+
+2. useMemo
+useMemo kisi expensive calculation ke result ko cache/memoize karta hai, taake har re-render par calculation dobara na karni pade.
+ab maanlo component main koi Expensive Calculation ho 
+Example Coceptually:
+100,000 products
+        ↓
+filter
+        ↓
+sort
+        ↓
+expensive calculation
+
+ab koi Unrelated State Change hui like Count 0 -> 1 hua to Component Re-render hoga 
+Normally:
+Re-Render → Expensive Calculation Again
+useMemo ke saath:
+Re-render
+   ↓
+Kya dependency change hui?
+      ↙       ↘
+    NO         YES
+    ↓           ↓
+Cached       Calculation
+result       AGAIN
+
+Code se smjhte hain:
+const filteredProducts = useMemo(() => {
+  return products.filter((product) => product.price > 1000);
+}, [products]);
+yahan:
+useMemo(
+  () => calculation,
+  [dependencies]
+)
+iska matlab:
+products same hain
+      ↓
+calculation dobara nahi
+      ↓
+previous result use karo
+
+lekin:
+products change
+      ↓
+calculation dobara
+      ↓
+new result cache
+
+useMemo vs React.memo 🔥
+
+Ye bohot important hai:
+
+|                        | `React.memo`                          | `useMemo`                   |
+| ---------------------- | ------------------------------------- | --------------------------- |
+| Kya memoize karta hai? | Component                             | Calculation ka result       |
+| Purpose                | Unnecessary component re-render avoid | Expensive calculation avoid |
+| Example                | `UserCard`                            | `filteredProducts`          |
+| Works with             | Props                                 | Dependencies                |
+
+⚠️ Important
+
+useMemo ka matlab ye nahi:
+
+"Har calculation ko useMemo mein daal do."
+
+Agar calculation simple hai:
+
+const total = price * quantity;
+
+to useMemo lagane ki zaroorat nahi.
+
+UseMemo mainly tab useful hota hai jab:
+
+calculation genuinely expensive ho
+large arrays ko filter/sort/process kar rahe ho
+unnecessary repeated calculation performance issue create kar rahi ho
+
+3. useCallback
+useCallback ek function ko memoize/cache karta hai, taake parent re-render hone par unnecessary new function create na ho.
+pehle Problem smjh lete hain:
+Suppose:
+Parent
+   ↓
+handleClick function
+   ↓
+Child
+
+Parent re-render hua:
+
+Parent re-render
+      ↓
+handleClick ka NEW function ❗
+      ↓
+Child ko new function prop mila
+      ↓
+Child re-render
+
+Even agar function ka actual kaam same hai.
+
+useCallback:
+const handleClick = useCallback(() => {
+  console.log("Clicked");
+}, []);
+Parent re-render
+      ↓
+useCallback
+      ↓
+Dependencies same?
+      ↓
+YES
+      ↓
+Same function reference ✅
+agar dependency change ho:
+dependency changed
+      ↓
+New function create
+
+React.memo + useCallback ka Connection:
+Ye sabse important part hai.
+Suppose:
+<Child onClick={handleClick} />
+Aur Child:
+React.memo(Child)
+
+Ab problem ye hai:
+Parent re-render
+      ↓
+New handleClick function
+      ↓
+Child receives new prop
+      ↓
+React.memo says:
+"Prop changed!" ❌
+      ↓
+Child re-render
+
+useCallback:
+Parent re-render
+      ↓
+useCallback
+      ↓
+Same function reference
+      ↓
+Child prop same ✅
+      ↓
+React.memo → skip re-render
+🔥 Ye dono aksar saath use kiye jaate hain.
+
+useMemo vs useCallback
+Isko bas ye yaad rakho:
+useMemo
+   ↓
+VALUE / RESULT ko memoize
+
+useCallback
+   ↓
+FUNCTION ko memoize
+
+Easy Example:
+Pehle situation
+
+Maan lo Parent ke paas:
+
+const [count, setCount] = useState(0);
+const [name, setName] = useState("Usman");
+
+Aur hum Child ko ek function bhej rahe hain:
+
+<Child onClick={handleClick} />
+
+Ab function:
+
+const handleClick = useCallback(() => {
+  console.log(name);
+}, [name]);
+Ab [name] ka matlab kya hai?
+
+Ye React ko keh raha hai:
+
+"Jab tak name change nahi hota, isi function ko reuse karna."
+
+Case 1 — count change hua
+
+Starting:
+
+name = "Usman"
+count = 0
+
+handleClick bana:
+
+Function A
+   ↓
+console.log("Usman")
+
+Ab:
+
+count: 0 → 1
+
+Parent re-render.
+
+React dekhta hai:
+
+name change hua?
+     ↓
+    NO ❌
+
+To useCallback:
+
+Function A
+   ↓
+same function reference ✅
+
+Child ko same function milti hai.
+
+Agar Child React.memo hai:
+
+Props same
+   ↓
+Child re-render skip ✅
+Case 2 — name change hua
+
+Ab:
+
+name: "Usman" → "Ali"
+
+Parent re-render.
+
+React dekhta hai:
+
+[name]
+   ↓
+name change hua?
+   ↓
+YES ✅
+
+To React new function create karega:
+
+Old:
+Function A → console.log("Usman")
+
+New:
+Function B → console.log("Ali")
+
+Ab Child ko new function reference mili:
+
+Child receives Function B
+        ↓
+Prop changed
+        ↓
+React.memo can't skip
+        ↓
+Child re-render 🔄
+🔥 Ye dependency ka actual funda hai
+const handleClick = useCallback(() => {
+  console.log(name);
+}, [name]);
+
+Think like this:
+
+                 name
+                  ↓
+           Dependency array
+                  ↓
+        ┌─────────┴─────────┐
+        ↓                   ↓
+ name same              name changed
+        ↓                   ↓
+same function          new function
+        ↓                   ↓
+Child can skip        Child may re-render
+Ek aur SUPER simple analogy 🧠
+
+useCallback ko bolo:
+
+"Meri function ko sambhal ke rakhna."
+
+Dependency array bolo:
+
+"Lekin agar ye cheez change ho, to purani function hata kar new function bana dena."
+
+So:
+
+useCallback(function, [name])
+                         ↑
+                  "name change ho
+                   to function update"
+
+4. Lazy Loading
+Suppose humari Application bht Large hai or us main Mutliple Pages hain like:
+Home
+Dashboard
+Admin
+Settings
+Profile
+Charts
+Editor
+...
+user ne sirf Home Open kia.
+Kya har cheez ka JavaScript immediately load karna zaroori hai?
+Not necessarily.
+
+Lazy loading ka idea:
+Jo cheez abhi required nahi, usko baad mein load karo.
+
+5. React.lazy
+React main Lazy Loading ke liye use krte hain.
+React.lazy() ==> Use hota hai.
+Example:
+const Dashboard = React.lazy(() => import("./Dashboard"));
+Dashboard component ko abhi load mat karo; jab required ho tab import karo.
+isko abhi hum ek dam Working Example se smjhte hain:
+I. Folder Structure
+src/
+│
+├── App.jsx
+└── Dashboard.jsx
+
+II.Dashboard.jsx
+Ye hamara normal component hai:
+function Dashboard() {
+  return (
+    <div>
+      <h1>Dashboard</h1>
+      <p>Welcome to your dashboard!</p>
+    </div>
+  );
+}
+
+export default Dashboard;
+Abhi tak kuch special nahi hai.
+
+III. Ab App.jsx
+Yahan magic hoga:
+import { lazy, Suspense, useState } from "react";
+const Dashboard = lazy(() => import("./Dashboard"));
+function App() {
+  const [showDashboard, setShowDashboard] = useState(false);
+
+  return (
+    <div>
+      <h1>My App</h1>
+
+      <button onClick={() => setShowDashboard(true)}>
+        Open Dashboard
+      </button>
+
+      {showDashboard && (
+        <Suspense fallback={<h2>Dashboard Loading...</h2>}>
+          <Dashboard />
+        </Suspense>
+      )}
+    </div>
+  );
+}
+export default App;
+
+Ab line-by-line samjho. 👇
+
+Sabse important line
+const Dashboard = lazy(() => import("./Dashboard"));
+Iska matlab:
+Dashboard ko abhi immediately load mat karo. Jab Dashboard actually render hone ki zaroorat aaye, tab ./Dashboard ko load karna.
+Ye:
+import("./Dashboard")
+dynamic import hai.
+
+Initially kya hoga?
+Jab app start hogi:
+App start
+   ↓
+My App
+   ↓
+Open Dashboard button
+Dashboard abhi screen par nahi hai.
+Because:
+showDashboard = false
+Ye condition:
+{showDashboard && (
+   ...
+)}
+false hai.
+So:
+Dashboard ❌
+
+Ab button click karo
+User:
+[ Open Dashboard ]
+       ↓
+      CLICK
+Ye chalega:
+setShowDashboard(true);
+Ab:
+showDashboard
+false → true
+React re-render karega.
+Ab condition:
+{showDashboard && ...}
+true ho gayi.
+React ko ab:
+<Dashboard />
+chahiye.
+
+Ab lazy() ka actual kaam start 🔥
+React dekhta hai:
+const Dashboard = lazy(() => import("./Dashboard"));
+Aur bolta hai:
+"Oh! Dashboard ab chahiye. Iska code load karo."
+Then:
+import("./Dashboard")
+       ↓
+Dashboard.jsx download/load
+       ↓
+Dashboard component ready
+       ↓
+Render
+
+Suspense kya kar raha hai?
+Dashboard load hone mein thoda time lag sakta hai.
+Isliye humne:
+<Suspense fallback={<h2>Dashboard Loading...</h2>}>
+likha.
+fallback ka matlab:
+"Jab Dashboard ready nahi hai, ye dikhao."
+So temporarily:
+Dashboard Loading...
+Aur jab Dashboard load ho gaya
+Dashboard Loading...
+       ↓
+Dashboard
+Welcome to your dashboard!
+
+Ek choti si baat jo confuse karti hai
+
+Ye:
+
+const Dashboard = lazy(() => import("./Dashboard"));
+
+Dashboard ko render nahi kar raha.
+
+Ye sirf React ko bata raha hai:
+
+"Dashboard ek lazy component hai; jab iska render required hoga, tab iska module load karna."
+
+Actual rendering:
+
+<Dashboard />
+
+se hoti hai.
+
+6. Suspense
+ab Problem:
+Dashbaord Code Load horha hai...
+tab tak UI main kia dekhenge?
+Suspense:
+<Suspense fallback={<p>Loading...</p>}>
+  <Dashboard />
+</Suspense>
+
+Mental Model:
+Need Dashboard
+      ↓
+Code loading...
+      ↓
+Suspense
+      ↓
+"Loading..."
+      ↓
+Code loaded
+      ↓
+Dashboard
+
+7. Code Splitting:
+Code Splitting = apni app ke JavaScript code ko multiple smaller chunks mein divide karna, instead of ek huge bundle banane ke.
+
+Imagine humari App main:
+Home
+Products
+Dashboard
+Admin
+Profile
+
+to humen isko ek File main Wrap krne ke bajaaye usko chunks main Divide krke rkhna chahye.
+Real World Example:
+🔥 Lazy Loading aur Code Splitting ka connection
+
+Ye sabse important part hai.
+
+Code Splitting:
+
+Code ko pieces/chunks mein divide karna.
+
+Lazy Loading:
+
+Un chunks ko zaroorat ke waqt load karna.
+
+So:
+
+Code Splitting
+      ↓
+Code ko chunks mein divide
+      ↓
+Lazy Loading
+      ↓
+Required chunk ko later load
+Tumhare previous example se samjho
+
+Humne likha tha:
+
+const Dashboard = lazy(() => import("./Dashboard"));
+
+Yahan:
+
+import("./Dashboard")
+
+bundler ko signal deta hai ke Dashboard ko separate chunk mein split kiya ja sakta hai.
+
+Then:
+
+Main App
+   │
+   ├── Dashboard chunk
+   ├── Admin chunk
+   └── Profile chunk
+
+User Dashboard open karta hai:
+
+User opens Dashboard
+        ↓
+Dashboard chunk load
+        ↓
+Dashboard render
+
+
+AB POORA CHAPTER EK MAP MAIN:
+                    PERFORMANCE
+                         │
+        ┌────────────────┴────────────────┐
+        │                                 │
+   WHY RE-RENDER?                    LARGE BUNDLE?
+        │                                 │
+        ↓                                 ↓
+   Re-rendering                      Lazy Loading
+        │                                 │
+        ↓                                 ├── React.lazy
+   Reconciliation                        │
+        │                                 └── Suspense
+        ↓
+      Keys
+        │
+        ↓
+  State Placement
+        │
+        ↓
+   React.memo
+        │
+        ├──────────────┐
+        ↓              ↓
+    useMemo       useCallback
+
+⚠️ Sabse important lesson
+
+Bro performance optimization ka matlab yeh nahi:
+
+Har component → React.memo ❌
+Har value → useMemo ❌
+Har function → useCallback ❌
+
+Instead:
+
+App slow?
+   ↓
+Find the reason
+   ↓
+Unnecessary re-render?
+   ↓
+Understand why
+   ↓
+Choose appropriate optimization
+Tumhare Level 9 ka actual goal:
+
+Optimization yaad karna nahi — React ke render behavior ko samajhna.
